@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Redis on Mzccddkk</title>
+		<link>https://mzccddkk.github.io/categories/redis/</link>
+		<description>Recent content in Redis on mzccddkk.github.io</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>en-us</language>
+		<copyright>© Copyright Mzccddkk | Vitae theme for Hugo</copyright>
+		<lastBuildDate>Sun, 06 Dec 2020 13:51:36 +0800</lastBuildDate>
+		
+		<atom:link href="https://mzccddkk.github.io/categories/redis/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>Redis 数据持久化机制 AOF 与 RDB</title>
+			<link>https://mzccddkk.github.io/post/redis-data-persistence-mechanism-aof-and-rdb/</link>
+			<pubDate>Sun, 06 Dec 2020 13:51:36 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/post/redis-data-persistence-mechanism-aof-and-rdb/</guid>
+			<description>
+				
+				我们知道，支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，那该如何处理呢？
+				
+			</description>
+		</item>
+		
+	</channel>
+</rss>
