@@ -398,8 +398,8 @@ filter <span style="color:#333">{</span>
 output <span style="color:#333">{</span>
   elasticsearch <span style="color:#333">{</span>
     <span style="color:#963">hosts</span> <span style="color:#333">=</span>&gt; <span style="background-color:#fff0f0">&#34;elasticsearch:9200&#34;</span>
-    <span style="color:#963">user</span> <span style="color:#333">=</span>&gt; <span style="background-color:#fff0f0">&#34;elastic&#34;</span>
-    <span style="color:#963">password</span> <span style="color:#333">=</span>&gt; <span style="background-color:#fff0f0">&#34;changeme&#34;</span>
+    <span style="color:#888">#user =&gt; &#34;elastic&#34;</span>
+    <span style="color:#888">#password =&gt; &#34;changeme&#34;</span>
     <span style="color:#963">ecs_compatibility</span> <span style="color:#333">=</span>&gt; disabled
     <span style="color:#963">index</span> <span style="color:#333">=</span>&gt; <span style="background-color:#fff0f0">&#34;logstash-%{[fields][appenv]}-%{[fields][appname]}-%{[filename]}&#34;</span>
   <span style="color:#333">}</span>
@@ -459,7 +459,7 @@ output <span style="color:#333">{</span>
   
   <span style="color:#888"># 开启</span>
 output.logstash:
-  hosts: <span style="color:#333">[</span><span style="background-color:#fff0f0">&#34;localhost:5044&#34;</span><span style="color:#333">]</span>
+  hosts: <span style="color:#333">[</span><span style="background-color:#fff0f0">&#34;192.168.1.22:5044&#34;</span>, <span style="background-color:#fff0f0">&#34;192.168.1.33:5044&#34;</span><span style="color:#333">]</span> <span style="color:#888"># 这里的地址换成 Logstash 服务的地址</span>
   <span style="color:#888">#loadbalance: true // 如果配置了多个 Logstash host，可以开启负载均衡</span>
 </code></pre></td></tr></table>
 </div>
