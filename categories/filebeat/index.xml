@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Filebeat on Mzccddkk</title>
+		<link>https://mzccddkk.github.io/categories/filebeat/</link>
+		<description>Recent content in Filebeat on mzccddkk.github.io</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>en-us</language>
+		<copyright>© Copyright Mzccddkk | Vitae theme for Hugo</copyright>
+		<lastBuildDate>Tue, 13 Apr 2021 10:45:15 +0800</lastBuildDate>
+		
+		<atom:link href="https://mzccddkk.github.io/categories/filebeat/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>使用 Docker 部署 ELK 集群，以及 Filebeat 的简单使用</title>
+			<link>https://mzccddkk.github.io/post/use-docker-to-deploy-a-elk-cluster-and-simple-usage-of-filebeat/</link>
+			<pubDate>Tue, 13 Apr 2021 10:45:15 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/post/use-docker-to-deploy-a-elk-cluster-and-simple-usage-of-filebeat/</guid>
+			<description>
+				
+				本文介绍使用 Docker 部署 ELK 集群，以及 Filebeat 的简单使用
+				
+			</description>
+		</item>
+		
+	</channel>
+</rss>

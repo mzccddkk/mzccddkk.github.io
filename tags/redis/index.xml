@@ -19,7 +19,7 @@
 			<guid>https://mzccddkk.github.io/post/redis-data-persistence-mechanism-aof-and-rdb/</guid>
 			<description>
 				
-				我们知道，支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，那该如何处理呢？
+				支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照
 				
 			</description>
 		</item>

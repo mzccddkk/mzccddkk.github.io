@@ -4,16 +4,86 @@
   
   <url>
     <loc>https://mzccddkk.github.io/categories/</loc>
-    <lastmod>2020-12-06T13:51:36+08:00</lastmod>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/elasticsearch/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/categories/elasticsearch/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/elk/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/categories/elk/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/filebeat/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/categories/filebeat/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/kibana/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/categories/kibana/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/logstash/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/categories/logstash/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://mzccddkk.github.io/</loc>
-    <lastmod>2020-12-06T13:51:36+08:00</lastmod>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://mzccddkk.github.io/post/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/post/use-docker-to-deploy-a-elk-cluster-and-simple-usage-of-filebeat/</loc>
+    <lastmod>2021-04-13T10:45:15+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/aof/</loc>
+    <lastmod>2020-12-06T13:51:36+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mzccddkk.github.io/tags/rdb/</loc>
     <lastmod>2020-12-06T13:51:36+08:00</lastmod>
   </url>
   
@@ -29,11 +99,6 @@
   
   <url>
     <loc>https://mzccddkk.github.io/post/redis-data-persistence-mechanism-aof-and-rdb/</loc>
-    <lastmod>2020-12-06T13:51:36+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://mzccddkk.github.io/tags/</loc>
     <lastmod>2020-12-06T13:51:36+08:00</lastmod>
   </url>
   

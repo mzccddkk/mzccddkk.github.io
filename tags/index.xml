@@ -7,10 +7,94 @@
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
 		<copyright>© Copyright Mzccddkk | Vitae theme for Hugo</copyright>
-		<lastBuildDate>Sun, 06 Dec 2020 13:51:36 +0800</lastBuildDate>
+		<lastBuildDate>Tue, 13 Apr 2021 10:45:15 +0800</lastBuildDate>
 		
 		<atom:link href="https://mzccddkk.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
 		
+		<item>
+			<title>Elasticsearch</title>
+			<link>https://mzccddkk.github.io/tags/elasticsearch/</link>
+			<pubDate>Tue, 13 Apr 2021 10:45:15 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/tags/elasticsearch/</guid>
+			<description>
+				
+				
+				
+			</description>
+		</item>
+		<item>
+			<title>ELK</title>
+			<link>https://mzccddkk.github.io/tags/elk/</link>
+			<pubDate>Tue, 13 Apr 2021 10:45:15 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/tags/elk/</guid>
+			<description>
+				
+				
+				
+			</description>
+		</item>
+		<item>
+			<title>Filebeat</title>
+			<link>https://mzccddkk.github.io/tags/filebeat/</link>
+			<pubDate>Tue, 13 Apr 2021 10:45:15 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/tags/filebeat/</guid>
+			<description>
+				
+				
+				
+			</description>
+		</item>
+		<item>
+			<title>Kibana</title>
+			<link>https://mzccddkk.github.io/tags/kibana/</link>
+			<pubDate>Tue, 13 Apr 2021 10:45:15 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/tags/kibana/</guid>
+			<description>
+				
+				
+				
+			</description>
+		</item>
+		<item>
+			<title>Logstash</title>
+			<link>https://mzccddkk.github.io/tags/logstash/</link>
+			<pubDate>Tue, 13 Apr 2021 10:45:15 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/tags/logstash/</guid>
+			<description>
+				
+				
+				
+			</description>
+		</item>
+		<item>
+			<title>AOF</title>
+			<link>https://mzccddkk.github.io/tags/aof/</link>
+			<pubDate>Sun, 06 Dec 2020 13:51:36 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/tags/aof/</guid>
+			<description>
+				
+				
+				
+			</description>
+		</item>
+		<item>
+			<title>RDB</title>
+			<link>https://mzccddkk.github.io/tags/rdb/</link>
+			<pubDate>Sun, 06 Dec 2020 13:51:36 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/tags/rdb/</guid>
+			<description>
+				
+				
+				
+			</description>
+		</item>
 		<item>
 			<title>Redis</title>
 			<link>https://mzccddkk.github.io/tags/redis/</link>
