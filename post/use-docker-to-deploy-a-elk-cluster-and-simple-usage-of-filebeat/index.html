@@ -99,7 +99,7 @@
 这里部署了两个 Logstash 节点，因为 Logstash 有性能瓶颈，使用多个节点开启负载均衡。</p>
 </blockquote>
 <h3 id="架构">架构</h3>
-<p>使用 Filebeat 收集日志，输出到 Logstash 中，在 Logstash 中过滤数据，之后写入到 Elasticsearch，再由 Kibana 可视化。</p>
+<p>使用 Filebeat 收集日志，输出到 Logstash 中，在 Logstash 中过滤数据，之后写入到 Elasticsearch 中存储，再由 Kibana 可视化。</p>
 <h2 id="开始">开始</h2>
 <p>为了避免环境差异和保持简单，同时也为了避免重复造轮子，使用 <a href="https://github.com/deviantony/docker-elk" target="_blank">docker-elk</a> 项目。</p>
 <blockquote>
