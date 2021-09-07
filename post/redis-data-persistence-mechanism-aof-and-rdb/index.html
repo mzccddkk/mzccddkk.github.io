@@ -218,6 +218,10 @@ save <span style="color:#60e;font-weight:bold">60</span> <span style="color:#60e
 </ul>
 <p>AOF 日志和 RDB 快照混合使用是 Redis 4.0 中提出的一种方法。</p>
 <p>具体来说，就是以一定的频率执行 RDB 快照，在两次快照之间，使用 AOF 日志记录这期间的所有命令操作。这样一来，既充分利用了 RDB 快照恢复数据快，避免了 RDB 快照频繁执行对主线程的影响，又充分利用了 AOF 日志数据丢失率低，也减少 AOF 日志文件大小，避免日志重写的开销。</p>
+<h2 id="参考">参考</h2>
+<ol>
+<li><a href="https://redis.io/topics/persistence">https://redis.io/topics/persistence</a></li>
+</ol>
 
 	</div>
 	
