@@ -7,10 +7,22 @@
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
 		<copyright>© Copyright Mzccddkk | Vitae theme for Hugo</copyright>
-		<lastBuildDate>Tue, 13 Apr 2021 10:45:15 +0800</lastBuildDate>
+		<lastBuildDate>Tue, 07 Sep 2021 17:26:37 +0800</lastBuildDate>
 		
 		<atom:link href="https://mzccddkk.github.io/index.xml" rel="self" type="application/rss+xml" />
 		
+		<item>
+			<title>Socket 粘包解决方案</title>
+			<link>https://mzccddkk.github.io/post/socket-sticky-package-solution/</link>
+			<pubDate>Tue, 07 Sep 2021 17:26:37 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/post/socket-sticky-package-solution/</guid>
+			<description>
+				
+				Socket 粘包问题探索
+				
+			</description>
+		</item>
 		<item>
 			<title>使用 Docker 部署 ELK 集群，以及 Filebeat 的简单使用</title>
 			<link>https://mzccddkk.github.io/post/use-docker-to-deploy-a-elk-cluster-and-simple-usage-of-filebeat/</link>

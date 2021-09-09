@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+	
+	<meta name="generator" content="Hugo 0.79.1" />
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<meta property="og:title" content="Socket 粘包解决方案">
+	
+	
+	<meta name="keywords" content="TCP,Socket"><meta name="description" content="Socket 粘包问题探索"><meta property="og:title" content="Socket 粘包解决方案" />
+<meta property="og:description" content="Socket 粘包问题探索" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mzccddkk.github.io/post/socket-sticky-package-solution/" />
+<meta property="article:published_time" content="2021-09-07T17:26:37+08:00" />
+<meta property="article:modified_time" content="2021-09-07T17:26:37+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Socket 粘包解决方案"/>
+<meta name="twitter:description" content="Socket 粘包问题探索"/>
+<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/all.css" />
+	<link rel="stylesheet" href="/css/katex.min.css" crossorigin="anonymous">
+	<script defer src="/js/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+	<script defer src="/js/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><link rel="stylesheet" type="text/css" media="screen" href="/css/custom.css" /><title>Socket 粘包解决方案 | Mzccddkk</title></head>
+<body><header>
+	
+	<div id="titletext"><h2 id="title"><a href="https://mzccddkk.github.io/">Mzccddkk</a></h2></div>
+	<div id="title-description"><p id="subtitle"></p><div id="social">
+			<nav>
+				<ul><li><a href="mailto:mzccddkk@gmail.com"><i title="Email" class="icons fas fa-envelope"></i></a></li>
+					<li><a href="/index.xml"><i title="RSS" class="icons fas fa-rss"></i></a></li></ul>
+			</nav>
+		</div>
+	</div>
+	
+	<div id="mainmenu">
+		<nav>
+			<ul>
+				
+				<li><a href="/">Home</a></li>
+				
+				<li><a href="/post">All Posts</a></li>
+				
+				<li><a href="/tags">Tags</a></li>
+				
+				<li><a href="/categories">Categories</a></li>
+				
+			</ul>
+		</nav>
+	</div>
+	
+</header>
+<main><div class="post">
+	
+	<div class="author">
+	
+	</div>
+	<div class="post-header">
+	
+		<div class="meta">
+			
+			<div class="date">
+				<span class="day">07</span>
+				<span class="rest">Sep 2021</span>
+			</div>
+			
+		</div>
+		
+		<div class="matter">
+			<h1 class="title">Socket 粘包解决方案</h1>
+		</div>
+	</div>
+	<div class="markdown">
+		<h2 id="什么是粘包半包">什么是粘包/半包？</h2>
+<ul>
+<li>
+<p>粘包：</p>
+<ul>
+<li>发送方发了两条消息：ABC、DEF</li>
+<li>接收方收到一条消息：ABCDEF</li>
+</ul>
+</li>
+<li>
+<p>半包：</p>
+<ul>
+<li>发送方发了一条消息：ABCDEF</li>
+<li>接收方收到两条消息：ABC、DEF</li>
+</ul>
+</li>
+</ul>
+<h2 id="为什么会有粘包半包问题">为什么会有粘包/半包问题？</h2>
+<ul>
+<li>TCP</li>
+</ul>
+<p>TCP 是一种面向连接的、可靠的、基于字节流的传输层通信协议。</p>
+<p>对于 TCP 来说，传输数据是以流的形式，而流数据没有明确的开始结束边界，也就没有办法判断哪那一段流属于哪一个消息。</p>
+<ul>
+<li>Socket</li>
+</ul>
+<p>Socket 是应用层与 TCP/IP 协议族通信的中间软件抽象层。可以理解为 TCP/IP 网络的 API。</p>
+<ul>
+<li>流量控制</li>
+</ul>
+<p>流量控制用来避免发送方发送数据过快而使接收方来不及完全收下，一般由接收方通知发送方来进行调控。</p>
+<p>TCP 使用滑动窗口协议来实现流量控制。接收方在 “接收窗口” 域指出还可接收的字节数量。发送方在没有新的确认包的情况下至多发送 “接收窗口” 允许的字节数量。接收方可修改 “接收窗口” 的值。</p>
+<p>如果接收方以很小的增量来处理到来的数据，它就会发布一系列小的接收窗口。在 TCP 的数据包中发送一些很小的字节，相对于 TCP 包头是很大的开销。解决这个问题，就要避免对小的 Window Size 做出响应，直到有足够大的 Window Size 再响应。</p>
+<p>为了提高 TCP 的传输效率，Nagle 算法被设计出来，用在发送方发送数据时做延时处理。</p>
+<p>条件一：Window Size &gt;= MSS 且 Data Size &gt;= MSS；</p>
+<p>条件二：等待时间或是超时 200ms。</p>
+<blockquote>
+<p>MSS：Maximum segment size 最大分段大小。是在单个分段中TCP愿意接受的数据的字节数最大值。</p>
+</blockquote>
+<p>这两个条件有一个满足，才会发送数据，否则就积累数据。Nagle 算法默认是打开的，所以对于一些需要小包场景的程序——比如像 telnet 这样的交互性程序，需要关闭这个算法。可以在 Socket 设置 TCP_NODELAY 选项来关闭这个算法。</p>
+<h2 id="怎么解决粘包半包">怎么解决粘包/半包？</h2>
+<ol>
+<li>
+<p>固定长度（fix length）</p>
+<p>发送方发送消息和接收方接收消息都使用统一的大小。当有效数据量小于该固定长度时，会出现资源浪费。</p>
+</li>
+<li>
+<p>基于长度字段解码（length field based frame decoder）</p>
+<p>封装请求协议，在协议头中增加表示数据正文大小的字段。接收方从字节流中按这个字段给定的长度读取数据。但这种方式编码成本较大。</p>
+<blockquote>
+<p>HTTP 消息中使用 Content-Length 头表示 HTTP 消息的数据负载大小，应用层协议解析的时候就能从中分离出完整的 HTTP 消息。</p>
+</blockquote>
+</li>
+<li>
+<p>基于分隔符（delimiter based）</p>
+<p>在消息的结尾增加特殊字符确定数据流的边界。</p>
+<blockquote>
+<p>HTTP 消息发送内容大小不确定时，会使用该策略。并使用块传输的机制，HTTP 头中也不再包含 Content-Length 。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="references">References</h2>
+<ol>
+<li>传输控制协议 <a href="https://zh.wikipedia.org/wiki/%E4%BC%A0%E8%BE%93%E6%8E%A7%E5%88%B6%E5%8D%8F%E8%AE%AE">https://zh.wikipedia.org/wiki/%E4%BC%A0%E8%BE%93%E6%8E%A7%E5%88%B6%E5%8D%8F%E8%AE%AE</a></li>
+</ol>
+
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="tags">
+		<div class="taxosfloating_left">
+			<p>Categories</p>
+		</div>
+		<div class="termsfloating_right">
+			<p>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<a href="/categories/socket/"> socket </a>
+			
+			
+			
+			
+			
+			<a href="/categories/tcp/"> tcp </a>
+			
+			
+			
+			</p>
+		</div>
+		<div class="clearit"></div>
+		
+		
+		
+		
+	
+		
+	
+	
+	
+	<div class="tags">
+		<div class="taxosfloating_left">
+			<p>Tags</p>
+		</div>
+		<div class="termsfloating_right">
+			<p>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<a href="/tags/socket/"> socket </a>
+			
+			
+			
+			
+			
+			<a href="/tags/tcp/"> tcp </a>
+			
+			
+			
+			</p>
+		</div>
+		<div class="clearit"></div>
+		
+		
+		
+		
+		
+	</div></div>
+
+  </main>
+<footer>
+	 © Copyright Mzccddkk | <a href="https://github.com/dataCobra/hugo-vitae">Vitae</a> theme for <a href="https://gohugo.io">Hugo</a> 
+	
+	
+	
+</footer>
+
+
+</body>
+</html>
