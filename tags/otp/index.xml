@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>OTP on Mzccddkk</title>
+		<link>https://mzccddkk.github.io/tags/otp/</link>
+		<description>Recent content in OTP on mzccddkk.github.io</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>en-us</language>
+		<copyright>© Copyright Mzccddkk | Vitae theme for Hugo</copyright>
+		<lastBuildDate>Wed, 23 Mar 2022 14:53:38 +0800</lastBuildDate>
+		
+		<atom:link href="https://mzccddkk.github.io/tags/otp/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>一种付款码数字生成方法</title>
+			<link>https://mzccddkk.github.io/post/a-kind-of-digital-generation-method-of-payment-code/</link>
+			<pubDate>Wed, 23 Mar 2022 14:53:38 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/post/a-kind-of-digital-generation-method-of-payment-code/</guid>
+			<description>
+				
+				一种付款码数字的设计与实现
+				
+			</description>
+		</item>
+		
+	</channel>
+</rss>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+	
+	<meta name="generator" content="Hugo 0.79.1" />
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<meta property="og:title" content="一种付款码数字生成方法">
+	
+	
+	<meta name="keywords" content="OTP,TOTP"><meta name="description" content="一种付款码数字的设计与实现"><meta property="og:title" content="一种付款码数字生成方法" />
+<meta property="og:description" content="一种付款码数字的设计与实现" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mzccddkk.github.io/post/a-kind-of-digital-generation-method-of-payment-code/" />
+<meta property="article:published_time" content="2022-03-23T14:53:38+08:00" />
+<meta property="article:modified_time" content="2022-03-23T14:53:38+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="一种付款码数字生成方法"/>
+<meta name="twitter:description" content="一种付款码数字的设计与实现"/>
+<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/all.css" />
+	<link rel="stylesheet" href="/css/katex.min.css" crossorigin="anonymous">
+	<script defer src="/js/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+	<script defer src="/js/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><link rel="stylesheet" type="text/css" media="screen" href="/css/custom.css" /><title>一种付款码数字生成方法 | Mzccddkk</title></head>
+<body><header>
+	
+	<div id="titletext"><h2 id="title"><a href="https://mzccddkk.github.io/">Mzccddkk</a></h2></div>
+	<div id="title-description"><p id="subtitle"></p><div id="social">
+			<nav>
+				<ul><li><a href="mailto:mzccddkk@gmail.com"><i title="Email" class="icons fas fa-envelope"></i></a></li>
+					<li><a href="/index.xml"><i title="RSS" class="icons fas fa-rss"></i></a></li></ul>
+			</nav>
+		</div>
+	</div>
+	
+	<div id="mainmenu">
+		<nav>
+			<ul>
+				
+				<li><a href="/">Home</a></li>
+				
+				<li><a href="/post">All Posts</a></li>
+				
+				<li><a href="/tags">Tags</a></li>
+				
+				<li><a href="/categories">Categories</a></li>
+				
+			</ul>
+		</nav>
+	</div>
+	
+</header>
+<main><div class="post">
+	
+	<div class="author">
+	
+	</div>
+	<div class="post-header">
+	
+		<div class="meta">
+			
+			<div class="date">
+				<span class="day">23</span>
+				<span class="rest">Mar 2022</span>
+			</div>
+			
+		</div>
+		
+		<div class="matter">
+			<h1 class="title">一种付款码数字生成方法</h1>
+		</div>
+	</div>
+	<div class="markdown">
+		<p>一种付款码数字的设计与实现</p>
+<h3 id="付款码由四部分组成">付款码由四部分组成：</h3>
+<p>第一部分（P，2 位）：由应用自定义的 2 位识别码，区分于其他码</p>
+<p>第二部分（X，4 位）：TOTP 算法生成的 4 位密码</p>
+<p>第三部分（Y，8 位）：校验用户，由 UID/X + FACTOR*X 计算得来，位数不够填充 0</p>
+<p>第四部分（Z，4 位）：校验用户，由 UID%X 计算得来，位数不够填充 0</p>
+<blockquote>
+<p>付款码数字总位数 18 位，可以根据需要调整每一部分位数</p>
+</blockquote>
+<h3 id="totp-算法">TOTP 算法：</h3>
+<p>基于时间的一次性密码算法是一种根据预共享的密钥与当前时间计算一次性密码的算法。比一般的密码安全性更强，更适合用在数据敏感的场景。</p>
+<p>K = 加密秘钥</p>
+<p>C = 当前秒级时间戳/步长</p>
+<p>DIGIT = 密码位数</p>
+<ul>
+<li>
+<p>步骤 1：使用 HMAC-SHA-1 算法基于 K 和 C 生成一个 20 字节的十六进制字符串，记为 hs</p>
+</li>
+<li>
+<p>步骤 2：选择 hs 的最后一个字节，取其低 4 位数并转化为十进制，记为 offset</p>
+</li>
+<li>
+<p>步骤 3：从 hs 中的第 offset 个字节开始选取 4 个字节并转化为十进制，作为生成 OTP 的基础数据，记为 bo</p>
+</li>
+<li>
+<p>步骤 4：将 bo 对 10 的 DIGIT 次幂进行取模运算，得到结果</p>
+</li>
+</ul>
+<h3 id="totp-算法示例">TOTP 算法示例：</h3>
+<p>假设：</p>
+<p>K = qC93ZPHeTNxh2SwB</p>
+<p>C = 1650266230/60</p>
+<p>DIGIT = 4</p>
+<ul>
+<li>
+<p>步骤 1：hs = HMAC-SHA-1(K, C) = e7eddba2e27bb3fe67821e2315a921dc304c6705</p>
+</li>
+<li>
+<p>步骤 2：offset = 最后一个字节 05 的低 4 位为 5，转化为十进制 = 5</p>
+</li>
+<li>
+<p>步骤 3：bo = 从 hs 的第 5 个字节开始取 4 个字节 7bb3fe67，转化为十进制 = 2075393639</p>
+</li>
+<li>
+<p>步骤 4：otp = 2075393639%10 的 4 次方 = 3639</p>
+</li>
+</ul>
+<h3 id="付款码生成示例">付款码生成示例：</h3>
+<p>假设：</p>
+<p>P = 78</p>
+<p>UID = 3993035</p>
+<p>FACTOR = 5</p>
+<p>TOTP = 3639</p>
+<p>则得到：</p>
+<p>X = 3639</p>
+<p>Y = UID/X + 5*X = 19292</p>
+<p>Z = UID%X = 1052</p>
+<p>最终的付款码为：783639000192921052</p>
+<h3 id="解码-uid">解码 UID：</h3>
+<p>从付款码 783639000192921052 得到：origX = 3639，origY = 00019292，origZ = 1052</p>
+<p>origY -= origX * FACTOR // 19292-36395=1097</p>
+<p>UID = origX * origY + origZ // 36391097+1052=3993035</p>
+<h2 id="references">References：</h2>
+<ol>
+<li><a href="https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm">https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm</a></li>
+<li><a href="https://tools.ietf.org/html/rfc6238">https://tools.ietf.org/html/rfc6238</a></li>
+</ol>
+
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="tags">
+		<div class="taxosfloating_left">
+			<p>Categories</p>
+		</div>
+		<div class="termsfloating_right">
+			<p>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			</p>
+		</div>
+		<div class="clearit"></div>
+		
+		
+		
+		
+	
+		
+	
+	
+	
+	<div class="tags">
+		<div class="taxosfloating_left">
+			<p>Tags</p>
+		</div>
+		<div class="termsfloating_right">
+			<p>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<a href="/tags/otp/"> otp </a>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<a href="/tags/totp/"> totp </a>
+			
+			
+			
+			</p>
+		</div>
+		<div class="clearit"></div>
+		
+		
+		
+		
+		
+	</div></div>
+
+  </main>
+<footer>
+	 © Copyright Mzccddkk | <a href="https://github.com/dataCobra/hugo-vitae">Vitae</a> theme for <a href="https://gohugo.io">Hugo</a> 
+	
+	
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KL9EQEZHRX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KL9EQEZHRX');
+</script>
+	
+</footer>
+
+
+</body>
+</html>
