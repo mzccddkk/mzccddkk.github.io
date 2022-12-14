@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>MRR on Mzccddkk</title>
+		<link>https://mzccddkk.github.io/tags/mrr/</link>
+		<description>Recent content in MRR on mzccddkk.github.io</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>en-us</language>
+		<copyright>© Copyright Mzccddkk | Vitae theme for Hugo</copyright>
+		<lastBuildDate>Wed, 22 Sep 2021 18:54:51 +0800</lastBuildDate>
+		
+		<atom:link href="https://mzccddkk.github.io/tags/mrr/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>MySQL Multi-Range Read（MRR）优化</title>
+			<link>https://mzccddkk.github.io/post/mysql-multi-range-read-optimization/</link>
+			<pubDate>Wed, 22 Sep 2021 18:54:51 +0800</pubDate>
+			
+			<guid>https://mzccddkk.github.io/post/mysql-multi-range-read-optimization/</guid>
+			<description>
+				
+				MySQL Multi-Range Read（MRR）Optimization
+				
+			</description>
+		</item>
+		
+	</channel>
+</rss>

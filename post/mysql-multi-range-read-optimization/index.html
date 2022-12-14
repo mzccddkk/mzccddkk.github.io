@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+	
+	<meta name="generator" content="Hugo 0.79.1" />
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<meta property="og:title" content="MySQL Multi-Range Read（MRR）优化">
+	
+	
+	<meta name="keywords" content="MySQL,MRR"><meta name="description" content="MySQL Multi-Range Read（MRR）Optimization"><meta property="og:title" content="MySQL Multi-Range Read（MRR）优化" />
+<meta property="og:description" content="MySQL Multi-Range Read（MRR）Optimization" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mzccddkk.github.io/post/mysql-multi-range-read-optimization/" />
+<meta property="article:published_time" content="2021-09-22T18:54:51+08:00" />
+<meta property="article:modified_time" content="2021-09-22T18:54:51+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="MySQL Multi-Range Read（MRR）优化"/>
+<meta name="twitter:description" content="MySQL Multi-Range Read（MRR）Optimization"/>
+<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/all.css" />
+	<link rel="stylesheet" href="/css/katex.min.css" crossorigin="anonymous">
+	<script defer src="/js/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+	<script defer src="/js/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><link rel="stylesheet" type="text/css" media="screen" href="/css/custom.css" /><title>MySQL Multi-Range Read（MRR）优化 | Mzccddkk</title></head>
+<body><header>
+	
+	<div id="titletext"><h2 id="title"><a href="https://mzccddkk.github.io/">Mzccddkk</a></h2></div>
+	<div id="title-description"><p id="subtitle"></p><div id="social">
+			<nav>
+				<ul><li><a href="mailto:mzccddkk@gmail.com"><i title="Email" class="icons fas fa-envelope"></i></a></li>
+					<li><a href="/index.xml"><i title="RSS" class="icons fas fa-rss"></i></a></li></ul>
+			</nav>
+		</div>
+	</div>
+	
+	<div id="mainmenu">
+		<nav>
+			<ul>
+				
+				<li><a href="/">Home</a></li>
+				
+				<li><a href="/post">All Posts</a></li>
+				
+				<li><a href="/tags">Tags</a></li>
+				
+				<li><a href="/categories">Categories</a></li>
+				
+			</ul>
+		</nav>
+	</div>
+	
+</header>
+<main><div class="post">
+	
+	<div class="author">
+	
+	</div>
+	<div class="post-header">
+	
+		<div class="meta">
+			
+			<div class="date">
+				<span class="day">22</span>
+				<span class="rest">Sep 2021</span>
+			</div>
+			
+		</div>
+		
+		<div class="matter">
+			<h1 class="title">MySQL Multi-Range Read（MRR）优化</h1>
+		</div>
+	</div>
+	<div class="markdown">
+		<p>MySQL 使用二级索引上的范围扫描读取行可能会导致对基表的许多随机磁盘访问。通过磁盘扫描多范围读取 (MRR) 优化，可以减少范围扫描的随机磁盘访问次数。</p>
+<h2 id="测试数据">测试数据</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#080;font-weight:bold">create</span> <span style="color:#080;font-weight:bold">table</span> <span style="color:#06b;font-weight:bold">t1</span>(id <span style="color:#339;font-weight:bold">int</span> <span style="color:#080;font-weight:bold">primary</span> <span style="color:#080;font-weight:bold">key</span>, a <span style="color:#339;font-weight:bold">int</span>, b <span style="color:#339;font-weight:bold">int</span>, <span style="color:#080;font-weight:bold">index</span>(a));
+
+delimiter ;;
+<span style="color:#080;font-weight:bold">create</span> <span style="color:#080;font-weight:bold">procedure</span> <span style="color:#06b;font-weight:bold">idata</span>()
+begin
+  <span style="color:#080;font-weight:bold">declare</span> i <span style="color:#339;font-weight:bold">int</span>;
+  <span style="color:#339;font-weight:bold">set</span> i<span style="color:#333">=</span><span style="color:#00d;font-weight:bold">1</span>;
+  <span style="color:#080;font-weight:bold">while</span>(i<span style="color:#333">&lt;=</span><span style="color:#00d;font-weight:bold">10000</span>)do
+    <span style="color:#080;font-weight:bold">insert</span> <span style="color:#080;font-weight:bold">into</span> t1 <span style="color:#080;font-weight:bold">values</span>(i, i, i);
+    <span style="color:#339;font-weight:bold">set</span> i<span style="color:#333">=</span>i<span style="color:#333">+</span><span style="color:#00d;font-weight:bold">1</span>;
+  end <span style="color:#080;font-weight:bold">while</span>;
+end;;
+delimiter ;;
+
+<span style="color:#080;font-weight:bold">call</span> <span style="color:#06b;font-weight:bold">idata</span>();
+</code></pre></td></tr></table>
+</div>
+</div><p>MRR 优化的主要目的是为了使用顺序读盘。</p>
+<p>回顾一下回表的概念。回表是指，InnoDB 在普通索引上查到主键 id 的值后，再根据一个个主键 id 的值到主键索引上去查找整行数据的过程。</p>
+<p>回表过程是一行行地查数据，还是批量地查数据？</p>
+<p>假设执行语句：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#080;font-weight:bold">select</span> <span style="color:#333">*</span> <span style="color:#080;font-weight:bold">from</span> t1 <span style="color:#080;font-weight:bold">where</span> a <span style="color:#333">&gt;=</span> <span style="color:#00d;font-weight:bold">100</span> <span style="color:#080;font-weight:bold">and</span> a <span style="color:#333">&lt;=</span> <span style="color:#00d;font-weight:bold">200</span>;
+</code></pre></td></tr></table>
+</div>
+</div><p>主键索引是一颗 B+ 树，在这棵树上，每次只能根据一个主键 id 查到一行数据。因此，回表肯定是一行行搜索主键索引的。</p>
+<p>如果随着 a 的值递增顺序查询的话，id 的值就变成随机的，那么就会出现随机访问，性能相对较差。虽然“按行查”这个机制不能改，但是调整查询的顺序，还是能够加速的。</p>
+<p><strong>因为大多数的数据都是按照主键递增顺序插入得到的，所以我们可以认为，如果按照主键的递增顺序查询的话，对磁盘的读比较接近顺序读，能够提升读性能。</strong></p>
+<p>这，就是 MRR 优化的设计思路。此时，语句的执行流程变成了这样：</p>
+<ol>
+<li>根据索引 a，定位到满足条件的记录，将 id 值放入 read_rnd_buffer 中；</li>
+<li>将 read_rnd_buffer 中的 id 进行递增排序；</li>
+<li>排序后的 id 数组，依次到主键 id 索引中查记录，并作为结果返回。</li>
+</ol>
+<p>这里，read_rnd_buffer 的大小是由 read_rnd_buffer_size 参数控制的。如果步骤 1 中，read_rnd_buffer 放满了，就会先执行完步骤 2 和 3，然后清空 read_rnd_buffer。之后继续找索引 a 的下个记录，并继续循环。</p>
+<p>如果想要稳定使用 MRR 优化的话，需要设置 <code>set optimizer_switch=&quot;mrr_cost_based=off&quot;</code> 。（官方文档的说法，是现在的优化器策略，判断消耗的时候，会更倾向于不使用 MRR，把 mrr_cost_based 设置为 off，就是固定使用 MRR 了。）</p>
+<p>使用了 MRR 优化后的执行流程和 explain 结果：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql">mysql<span style="color:#333">&gt;</span> <span style="color:#339;font-weight:bold">set</span> optimizer_switch<span style="color:#333">=</span><span style="background-color:#fff0f0">&#34;mrr_cost_based=off&#34;</span>;
+Query OK, <span style="color:#00d;font-weight:bold">0</span> rows <span style="color:#06b;font-weight:bold">affected</span> (<span style="color:#00d;font-weight:bold">0</span>.<span style="color:#00d;font-weight:bold">00</span> sec)
+
+mysql<span style="color:#333">&gt;</span> <span style="color:#080;font-weight:bold">explain</span> <span style="color:#080;font-weight:bold">select</span> <span style="color:#333">*</span> <span style="color:#080;font-weight:bold">from</span> t1 <span style="color:#080;font-weight:bold">where</span> a <span style="color:#333">&gt;=</span> <span style="color:#00d;font-weight:bold">100</span> <span style="color:#080;font-weight:bold">and</span> a <span style="color:#333">&lt;=</span> <span style="color:#00d;font-weight:bold">200</span>;
+<span style="color:#333">+----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+----------------------------------+</span>
+<span style="color:#333">|</span> id <span style="color:#333">|</span> select_type <span style="color:#333">|</span> <span style="color:#080;font-weight:bold">table</span> <span style="color:#333">|</span> partitions <span style="color:#333">|</span> type  <span style="color:#333">|</span> possible_keys <span style="color:#333">|</span> <span style="color:#080;font-weight:bold">key</span>  <span style="color:#333">|</span> key_len <span style="color:#333">|</span> ref  <span style="color:#333">|</span> rows <span style="color:#333">|</span> filtered <span style="color:#333">|</span> Extra                            <span style="color:#333">|</span>
+<span style="color:#333">+----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+----------------------------------+</span>
+<span style="color:#333">|</span>  <span style="color:#00d;font-weight:bold">1</span> <span style="color:#333">|</span> SIMPLE      <span style="color:#333">|</span> t1    <span style="color:#333">|</span> <span style="color:#036;font-weight:bold">NULL</span>       <span style="color:#333">|</span> range <span style="color:#333">|</span> a             <span style="color:#333">|</span> a    <span style="color:#333">|</span> <span style="color:#00d;font-weight:bold">5</span>       <span style="color:#333">|</span> <span style="color:#036;font-weight:bold">NULL</span> <span style="color:#333">|</span>  <span style="color:#00d;font-weight:bold">101</span> <span style="color:#333">|</span>   <span style="color:#00d;font-weight:bold">100</span>.<span style="color:#00d;font-weight:bold">00</span> <span style="color:#333">|</span> <span style="color:#080;font-weight:bold">Using</span> <span style="color:#080;font-weight:bold">index</span> <span style="color:#080;font-weight:bold">condition</span>; <span style="color:#080;font-weight:bold">Using</span> MRR <span style="color:#333">|</span>
+<span style="color:#333">+----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+----------------------------------+</span>
+<span style="color:#00d;font-weight:bold">1</span> row <span style="color:#080;font-weight:bold">in</span> <span style="color:#339;font-weight:bold">set</span>, <span style="color:#00d;font-weight:bold">1</span> <span style="color:#06b;font-weight:bold">warning</span> (<span style="color:#00d;font-weight:bold">0</span>.<span style="color:#00d;font-weight:bold">00</span> sec)
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到，Extra 字段中多了 Using MRR，表示的是用上了 MRR 优化。
+而且，由于我们在 read_rnd_buffer 中按照 id 做了排序，所以最后得到的结果集也是按照主键 id 递增顺序的。</p>
+<h2 id="references">References</h2>
+<ol>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/mrr-optimization.html">https://dev.mysql.com/doc/refman/5.7/en/mrr-optimization.html</a></li>
+</ol>
+
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="tags">
+		<div class="taxosfloating_left">
+			<p>Categories</p>
+		</div>
+		<div class="termsfloating_right">
+			<p>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<a href="/categories/mysql/"> mysql </a>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			</p>
+		</div>
+		<div class="clearit"></div>
+		
+		
+		
+		
+	
+		
+	
+	
+	
+	<div class="tags">
+		<div class="taxosfloating_left">
+			<p>Tags</p>
+		</div>
+		<div class="termsfloating_right">
+			<p>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<a href="/tags/mrr/"> mrr </a>
+			
+			
+			
+			
+			
+			<a href="/tags/mysql/"> mysql </a>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			</p>
+		</div>
+		<div class="clearit"></div>
+		
+		
+		
+		
+		
+	</div></div>
+
+  </main>
+<footer>
+	 © Copyright Mzccddkk | <a href="https://github.com/dataCobra/hugo-vitae">Vitae</a> theme for <a href="https://gohugo.io">Hugo</a> 
+	
+	
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KL9EQEZHRX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KL9EQEZHRX');
+</script>
+	
+</footer>
+
+
+</body>
+</html>
