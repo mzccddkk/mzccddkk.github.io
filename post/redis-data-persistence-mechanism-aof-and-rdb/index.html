@@ -6,17 +6,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	
-	<meta property="og:title" content="Redis 数据持久化机制 AOF 日志与 RDB快照">
+	<meta property="og:title" content="Redis 数据持久化机制 AOF 日志与 RDB 快照">
 	
 	
-	<meta name="keywords" content="Redis,AOF,RDB"><meta name="description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照"><meta property="og:title" content="Redis 数据持久化机制 AOF 日志与 RDB快照" />
+	<meta name="keywords" content="Redis,AOF,RDB"><meta name="description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照"><meta property="og:title" content="Redis 数据持久化机制 AOF 日志与 RDB 快照" />
 <meta property="og:description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://mzccddkk.github.io/post/redis-data-persistence-mechanism-aof-and-rdb/" />
 <meta property="article:published_time" content="2020-12-06T13:51:36+08:00" />
 <meta property="article:modified_time" content="2020-12-06T13:51:36+08:00" />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Redis 数据持久化机制 AOF 日志与 RDB快照"/>
+<meta name="twitter:title" content="Redis 数据持久化机制 AOF 日志与 RDB 快照"/>
 <meta name="twitter:description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照"/>
 <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
 	<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
@@ -25,7 +25,7 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/css/all.css" />
 	<link rel="stylesheet" href="/css/katex.min.css" crossorigin="anonymous">
 	<script defer src="/js/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
-	<script defer src="/js/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><link rel="stylesheet" type="text/css" media="screen" href="/css/custom.css" /><title>Redis 数据持久化机制 AOF 日志与 RDB快照 | Mzccddkk</title></head>
+	<script defer src="/js/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><link rel="stylesheet" type="text/css" media="screen" href="/css/custom.css" /><title>Redis 数据持久化机制 AOF 日志与 RDB 快照 | Mzccddkk</title></head>
 <body><header>
 	
 	<div id="titletext"><h2 id="title"><a href="https://mzccddkk.github.io/">Mzccddkk</a></h2></div>
@@ -71,7 +71,7 @@
 		</div>
 		
 		<div class="matter">
-			<h1 class="title">Redis 数据持久化机制 AOF 日志与 RDB快照</h1>
+			<h1 class="title">Redis 数据持久化机制 AOF 日志与 RDB 快照</h1>
 		</div>
 	</div>
 	<div class="markdown">
