@@ -6,17 +6,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	
-	<meta property="og:title" content="Redis 数据持久化机制 AOF 与 RDB">
+	<meta property="og:title" content="Redis 数据持久化机制 AOF 日志与 RDB快照">
 	
 	
-	<meta name="keywords" content="Redis,AOF,RDB"><meta name="description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照"><meta property="og:title" content="Redis 数据持久化机制 AOF 与 RDB" />
+	<meta name="keywords" content="Redis,AOF,RDB"><meta name="description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照"><meta property="og:title" content="Redis 数据持久化机制 AOF 日志与 RDB快照" />
 <meta property="og:description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://mzccddkk.github.io/post/redis-data-persistence-mechanism-aof-and-rdb/" />
 <meta property="article:published_time" content="2020-12-06T13:51:36+08:00" />
 <meta property="article:modified_time" content="2020-12-06T13:51:36+08:00" />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Redis 数据持久化机制 AOF 与 RDB"/>
+<meta name="twitter:title" content="Redis 数据持久化机制 AOF 日志与 RDB快照"/>
 <meta name="twitter:description" content="支撑起 Redis 高性能的一个重要原因就是 Redis 中的数据是基于内存操作的。既然如此，一旦我们的服务器宕机，那么内存中的数据将全部丢失。这显然是不能接受的，本文就简单的介绍一下 Redis 的数据持久化机制 AOF 日志和 RDB 快照"/>
 <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
 	<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
@@ -25,7 +25,7 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/css/all.css" />
 	<link rel="stylesheet" href="/css/katex.min.css" crossorigin="anonymous">
 	<script defer src="/js/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
-	<script defer src="/js/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><link rel="stylesheet" type="text/css" media="screen" href="/css/custom.css" /><title>Redis 数据持久化机制 AOF 与 RDB | Mzccddkk</title></head>
+	<script defer src="/js/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><link rel="stylesheet" type="text/css" media="screen" href="/css/custom.css" /><title>Redis 数据持久化机制 AOF 日志与 RDB快照 | Mzccddkk</title></head>
 <body><header>
 	
 	<div id="titletext"><h2 id="title"><a href="https://mzccddkk.github.io/">Mzccddkk</a></h2></div>
@@ -71,7 +71,7 @@
 		</div>
 		
 		<div class="matter">
-			<h1 class="title">Redis 数据持久化机制 AOF 与 RDB</h1>
+			<h1 class="title">Redis 数据持久化机制 AOF 日志与 RDB快照</h1>
 		</div>
 	</div>
 	<div class="markdown">
@@ -79,11 +79,11 @@
 <h2 id="redis-数据持久化">Redis 数据持久化</h2>
 <p>Redis 数据持久化，指的是将内存中的数据持久化保存到磁盘中，这样一来，当服务器宕机，我们可以从磁盘中恢复数据。目前，Redis 支持的持久化机制主要有两种：</p>
 <ul>
-<li>AOF（Append Only File）日志</li>
-<li>RDB（Redis DataBase）快照</li>
+<li>AOF（Append Only File）日志。记录服务器收到的每一个写操作。</li>
+<li>RDB（Redis DataBase）快照。创建指定时间间隔数据的快照。</li>
 </ul>
 <h2 id="aof-日志">AOF 日志</h2>
-<p>AOF 日志在 <code>redis.conf</code> 中由 <code>appendonly</code> 配置：</p>
+<p>是否开启 AOF 日志在 <code>redis.conf</code> 中由 <code>appendonly</code> 配置项控制：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
@@ -92,18 +92,17 @@
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">appendonly no <span style="color:#888"># or yes</span>
 </code></pre></td></tr></table>
 </div>
-</div><h3 id="写后日志">写后日志</h3>
-<p>AOF 日志记录过程如下：</p>
+</div><p>AOF 日志记录过程如下：</p>
 <ol>
-<li>先执行命令写内存</li>
-<li>再记录日志</li>
+<li>先执行命令写内存，成功之后将命令写入到 AOF 日志缓冲区，等待写入磁盘；</li>
+<li>等待合适的时机将日志记录到磁盘中。</li>
 </ol>
 <p>Redis 为什么不像 MySQL 那样，先记录日志，再执行命令，以便服务宕机时恢复数据呢？</p>
 <ul>
 <li>首先，AOF 日志是一种<strong>增量备份</strong>日志，日志里面记录了操作 Redis 的命令，如果客户端发送的命令存在语法错误，我们就记录到日志中了，那么通过 AOF 恢复日志的时候便会出错。而且这些命令是以文本形式保存到日志中的，也会增加不必要的系统开销。</li>
 <li>其次，AOF 是在执行完命令才记录日志，不会阻塞当前的写操作。</li>
 </ul>
-<h3 id="写回策略">写回策略</h3>
+<h3 id="aof-写回策略">AOF 写回策略</h3>
 <p>写回策略在 <code>redis.conf</code> 中由 <code>appendfsync</code> 配置：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -113,42 +112,39 @@
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">appendfsync everysec <span style="color:#888"># default</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>它有以下三个配置项：</p>
+</div><p>它有以下三个选择项：</p>
 <ol>
 <li>
-<p><code>always</code>：同步写回。每个写命令执行完，立即将日志写入磁盘。基本不丢失数据，但会影响主线程性能（性能最差，数据可靠性高）</p>
+<p><code>always</code>：同步写回。每个写命令执行完，立即将日志写入磁盘。基本不丢失数据，但会影响主线程性能（性能最差，数据可靠性高）；</p>
 </li>
 <li>
-<p><code>everysec</code>：每秒写回。每个写命令执行完，先把日志写入到 AOF 文件的内存缓存区，每隔一秒把缓冲区中的内容写入磁盘（性能适中，数据可靠性适中）</p>
+<p><code>everysec</code>：每秒写回。每个写命令执行完，先把日志写入到 AOF 文件的内存缓存区，每隔一秒把缓冲区中的内容写入磁盘（性能适中，数据可靠性适中）；</p>
 </li>
 <li>
-<p><code>no</code>：操作系统控制写回时机。每个写命令执行完，先把日志写入到 AOF 文件的内存缓存区，然后由操作系统决定何时将缓冲内容写入磁盘（性能最好，数据可靠性差）</p>
+<p><code>no</code>：操作系统控制写回时机。每个写命令执行完，先把日志写入到 AOF 文件的内存缓存区，然后由操作系统决定何时将缓冲内容写入磁盘（性能最好，数据可靠性差）。</p>
 </li>
 </ol>
-<p>可以看到，这三种配置项都无法做到完美。具体使用那种策略，可以按照系统的性能、数据的可靠性需求去选择。Redis 默认的写回策略 <code>everysec</code> 是一个均衡的选择。</p>
+<p>可以看到，这三种配置项都无法做到完美。具体使用那种策略，可以按照系统的性能、数据的可靠性需求去选择。</p>
+<p>Redis 默认的写回策略 <code>everysec</code> 是一个均衡的选择。</p>
 <h3 id="aof-重写">AOF 重写</h3>
 <p>AOF 是一种增量备份日志，随着时间流逝，日志文件会越来越大，这个时候，如果要通过 AOF 日志恢复数据，整个过程就会非常缓慢，这会直接影响 Redis 服务的可用性。</p>
 <p>AOF 日志重写的本质是将每个键的多个操作命令<strong>合并</strong>为一个操作命令。</p>
-<blockquote>
 <p>多个操作命令指的是一个键被多条写命令反复修改，那么日志会相应的记录下来每次修改操作的命令，重写的时候，根据键值对最新的状态，生成一条最新的命令，这样一来，AOF 日志就完成了“瘦身“。对于一个或多个修改了成百上千次的键来说，能节省很多存储空间。</p>
-</blockquote>
 <p>举个例子：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">SADD m:set R
 SADD m:set e
-SPOP m:set <span style="color:#60e;font-weight:bold">2</span>
 SADD m:set R e d i s
 </code></pre></td></tr></table>
 </div>
-</div><p>我们依次运行上面 4 条命令，则 AOF 日志中会记录这 4 条命令。</p>
-<p>重写的话，对应上面这个例子，我们知道 m:set 中最新的数据为 R e d i s （无序）</p>
+</div><p>我们依次运行上面 3 条命令，则 AOF 日志中会记录这 3 条命令。</p>
+<p>重写的话，对应上面这个例子，我们知道 m:set 中最新的数据为 R e d i s （无序）。则重写之后 AOF 日志中只有一条命令的记录：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
@@ -157,17 +153,38 @@ SADD m:set R e d i s
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">SADD m:set R e d i s
 </code></pre></td></tr></table>
 </div>
-</div><p>则重写之后 AOF 日志中只有一条命令的记录。</p>
-<blockquote>
-<p>具体可以查看 <code>appendonly.aof</code>（默认的 AOF 日志文件名）文件的大小和内容变化。</p>
-</blockquote>
+</div><p>具体可以查看 <code>appendonly.aof</code>（默认的 AOF 日志文件名）文件的大小和内容变化。</p>
+<h3 id="aof-重写时机">AOF 重写时机</h3>
+<p>AOF 重写可以手动执行 <code>bgrewriteaof</code> 命令或者由配置项控制自动重写。
+<code>redis.conf</code> 中的两个配置项：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">auto-aof-rewrite-percentage <span style="color:#60e;font-weight:bold">100</span>
+auto-aof-rewrite-min-size 64mb
+</code></pre></td></tr></table>
+</div>
+</div><p><code>auto-aof-rewrite-percentage 100</code> 表示 AOF 文件比上次重写之后大小增加了 100% 时才会重写；</p>
+<p><code>auto-aof-rewrite-min-size 64mb</code> 表示 AOF 文件至少达到 64mb 时才会重写。</p>
 <h3 id="aof-重写会阻塞吗">AOF 重写会阻塞吗？</h3>
 <p>我们都知道，Redis 是”单线程“的，那么 AOF 日志重写是怎么执行的呢？</p>
-<p>实际上，在执行 <code>bgrewriteaof</code> 命令或者达到配置的重写条件后，主线程会 fork 出一个后台的 <code>bgrewriteaof</code> 子线程，fork 的时候会把主线程的内存拷贝一份给这个子线程，这里面包含的是最新的数据。因为主线程还可以接收新的请求，此时的日志使用的还是旧的日志，Redis 会把新的请求写到 AOF 日志缓冲区。另外子线程重写的日志会存放到一个新的 AOF 日志中，等重写完成后，会把重写过程中主线程产生的日志从缓冲区中追加到这个新的 AOF 日志中，最后再用新的 AOF 日志替换旧的日志。</p>
+<p>实际上，在执行 <code>bgrewriteaof</code> 命令或者达到配置的重写条件后，主线程会 fork 出一个后台的 <code>bgrewriteaof</code> 子线程，fork 的时候会把主线程的内存拷贝一份给这个子线程，这里面包含的是最新的数据（一处拷贝）。</p>
+<p>因为主线程还可以接收新的请求，此时的日志使用的还是旧的日志，Redis 会把新的请求写到 AOF 日志缓冲区和  AOF 重写日志缓冲区（两处日志）。另外子线程重写的日志会存放到一个新的 AOF 日志中，等重写完成后，会把重写过程中主线程产生的日志从缓冲区中追加到这个新的 AOF 日志中，最后再用新的 AOF 日志替换旧的日志。</p>
 <p>由于重写过程采用了额外的线程处理，所以这个过程<strong>不会</strong>阻塞主线程运行。</p>
+<p>但是重写过程中 fork 子进程和父进程产生写入会有潜在的阻塞风险：</p>
+<ul>
+<li>fork 子进程，fork 的瞬间肯定是会阻塞主进程的，且 fork 子进程需要拷贝进程必要的数据结构，在拷贝内存页表的时候会消耗 CPU 资源，在拷贝完成之前主进程是会阻塞的，阻塞时间长短取决于实例内存大小，实例越大，内存页表越大，阻塞时间就越久。但是并没有一次性拷贝大量内存数据给子进程，而是利用操作系统提供的<strong>写时复制</strong>（Copy On Write）机制，在发生写操作时，才真正拷贝数据；</li>
+<li>重写过程中父进程产生写入时，如果父进程操作的是一个存在的 key，那么此时主进程就会真正拷贝这个 key 的数据，申请新的内存空间，父子进程逐渐拥有独立的内存空间。因为内存空间是以页为单位进行分配的，默认 4k，如果父进程此时操作一个 bigkey，重新申请大块内存空间，就可能产生阻塞风险。另外，如果操作系统开启了内存大页机制（HugePages），那么父进程申请内存时阻塞的概率将会大大提高，所以一般在 Redis 机器上需要关闭 HugePages 机制。</li>
+</ul>
+<p>还有，AOF 重写也有一个重写日志，它不共享 AOF 本身的日志，有两个原因：</p>
+<ul>
+<li>首先，父子进程写同一个文件必然会产生竞争问题，控制竞争就会影响主进程的性能；</li>
+<li>其次，如果 AOF 重写的过程失败了，那么原本的 AOF 日志文件相当于被污染了，无法做恢复使用。所以，Redis 增加了一个 AOF 重写日志，如果重写失败，删除这个文件就行，不会对原有 AOF 日志有影响，等重写完成之后，直接替换原有的 AOF 日志文件即可。</li>
+</ul>
 <h2 id="rdb-快照">RDB 快照</h2>
-<p>对于内存快照，是把某一时刻内存中的数据记录下来。类似于生活中的拍照，照片就记录了某个时刻照片中人物、景物。</p>
-<h3 id="全量快照">全量快照</h3>
 <p>在 Redis 数据库中，为了保证数据的可靠性，执行的是<strong>全量快照</strong>，这意味着，生成一次 RDB 快照，就要遍历到所有键值对，这个开销是和全量数据量成正比的。这里我们不禁要想，RDB 快照操作是否会阻塞主线程？</p>
 <p>Redis 客户端提供了两个命令来生成 RDB 快照：</p>
 <ol>
@@ -187,9 +204,7 @@ SADD m:set R e d i s
 <pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">save &lt;seconds&gt; &lt;changes&gt;
 </code></pre></td></tr></table>
 </div>
-</div><blockquote>
-<p>表示 <code>seconds</code> 时间内，至少有 <code>changes</code> 个键修改，则执行一次 RDB 快照。</p>
-</blockquote>
+</div><p>表示 <code>seconds</code> 时间内，至少有 <code>changes</code> 个键修改，则执行一次 RDB 快照。</p>
 <p><code>save</code> 默认的配置如下:</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -208,15 +223,14 @@ save <span style="color:#60e;font-weight:bold">60</span> <span style="color:#60e
 <p>假设我们一个 Redis 实例中数据量有 4GB，磁盘写入带宽是 1GB/s，也就是说至少需要 4s（4/1=4）才能执行完快照操作，如果在开始执行的第 2s，未写入磁盘的数据遭到修改，那么就会破坏快照的完整性。</p>
 <p>如果快照期间数据不能被修改，这也是有问题的，假设磁盘写入带宽在执行快照时被占用了很多，那么这个时间将会变长，同时也会对业务造成巨大影响。</p>
 <p>你可能会想到，可以用 <code>bgsave</code> 避免阻塞啊。这里我们要知道，<strong>避免阻塞和正常处理写操作并不是一回事</strong>。此时，主线程的确没有阻塞，可以正常接收请求，但是，为了保证快照完整性，它只能处理读操作，因为不能修改正在执行快照的数据。为了快照而暂停写操作，肯定是不能接受的。</p>
-<p>所以 Redis 借助了操作系统提供的<strong>写时复制</strong>技术（Copy On Write，简称 COW）来实现 RDB 快照。</p>
+<p>所以 Redis 借助了操作系统提供的<strong>写时复制</strong>技术（Copy On Write）来实现 RDB 快照。</p>
 <p>具体来说，进行 RDB 快照时，Redis 主线程会 fork 一个 <code>bgsave</code> 子线程出来，子线程共享主线程所有的内存数据，RDB 快照将会在这个子线程中执行。此时，如果主线程要修改一块数据，那么，这块数据就会被复制一份，生成该数据的副本。然后，<code>bgsave</code> 子线程会把这个副本数据写入 RDB 文件，而在这个过程中，主线程仍然可以直接修改原来的数据。这既保证了快照的完整性，也允许主线程同时对数据进行修改，避免了对正常业务的影响。</p>
 <h2 id="总结">总结</h2>
 <ul>
-<li>如果只使用 AOF 日志持久化数据，优先使用 <code>everysec</code> 写回策略，因为它在数据可靠性和系统性能之间做了一个平衡。</li>
+<li>如果只使用 AOF 日志持久化数据，优先使用 <code>everysec</code> 写回策略，因为它在数据可靠性和系统性能之间做了一个平衡；</li>
 <li>如果只使用 RDB 快照持久化数据，那么要允许分钟级别的数据丢失。</li>
-<li>AOF 日志和 RDB 快照混合使用。</li>
 </ul>
-<p>AOF 日志和 RDB 快照混合使用是 Redis 4.0 中提出的一种方法。</p>
+<p>Redis 4.0  中提出了 AOF 日志和 RDB 快照混合使用的方法。</p>
 <p>具体来说，就是以一定的频率执行 RDB 快照，在两次快照之间，使用 AOF 日志记录这期间的所有命令操作。这样一来，既充分利用了 RDB 快照恢复数据快，避免了 RDB 快照频繁执行对主线程的影响，又充分利用了 AOF 日志数据丢失率低，也减少 AOF 日志文件大小，避免日志重写的开销。</p>
 <h2 id="references">References</h2>
 <ol>
